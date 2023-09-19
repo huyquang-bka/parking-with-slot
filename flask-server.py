@@ -1,6 +1,5 @@
 import cv2
 from flask import Flask, request, jsonify, Response
-import requests
 import zipfile
 import numpy as np
 
@@ -8,55 +7,87 @@ app = Flask(__name__)
 port = 5518
 
 # create a black image 1920x1080
-original = np.zeros((1080, 1920, 3), np.uint8)
-processed = np.zeros((1080, 1920, 3), np.uint8)
+original_tdn = np.zeros((1080, 1920, 3), np.uint8)
+processed_tdn = np.zeros((1080, 1920, 3), np.uint8)
+original_c9 = np.zeros((1080, 1920, 3), np.uint8)
+processed_c9 = np.zeros((1080, 1920, 3), np.uint8)
+original_d35 = np.zeros((1080, 1920, 3), np.uint8)
+processed_d35 = np.zeros((1080, 1920, 3), np.uint8)
 
-data_image = {"original": original, "processed": processed}
+data_image = {"original_tdn": original_tdn,
+              "processed_tdn": processed_tdn,
+              "original_c9": original_c9,
+              "processed_c9": processed_c9,
+              "original_d35": original_d35,
+              "processed_d35": processed_d35
+              }
 
 
-def stream(key='original'):
+def stream(key='original_tdn'):
     while True:
         try:
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + data_image[key] + b'\r\n')
+            fp = 'data/' + key + '.jpg'
+            image = cv2.imread(fp)
+            if image is not None:
+                data_image[key] = image.copy()
         except:
             pass
+        ret, buffer = cv2.imencode('.jpg', data_image[key])
+        buffer = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + buffer + b'\r\n')
 
 
-@app.route('/original')
-def original():
-    return Response(stream(key='original'),
+@app.route('/original-tdn')
+def original_tdn():
+    return Response(stream(key='original_tdn'),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route('/processed')
-def processed():
-    return Response(stream(key='processed'),
+@app.route('/processed-tdn')
+def processed_tdn():
+    return Response(stream(key='processed_tdn'),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/original-c9')
+def original_c9():
+    return Response(stream(key='original_c9'),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/processed-c9')
+def processed_c9():
+    return Response(stream(key='processed_c9'),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/original-d35')
+def original_d35():
+    return Response(stream(key='original_d35'),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/processed-d35')
+def processed_d35():
+    return Response(stream(key='processed_d35'),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route('/', methods=['GET'])
 def index():
-    ip = requests.get('https://api.ipify.org').content.decode('utf-8')
-    return "Connected to Flask server, ip: {}, port: {}".format(ip, port)
+    return "Hello, World!"
 
 
 @app.route('/get-data', methods=['POST'])
 def get_data():
-    global original, processed
+    global original_tdn, processed_tdn
     f = request.files['file']
     f.save('data.zip')
     with zipfile.ZipFile('data.zip', 'r') as zip_ref:
         zip_ref.extractall('data')
-    try:
-        original = cv2.imread('data/original.jpg')
-        processed = cv2.imread('data/processed.jpg')
-        data_image["original"] = original
-        data_image["processed"] = processed
-        return jsonify({'status': 'success'})
-    except:
-        return jsonify({'status': 'failed image'})
+    return jsonify({'status': 'success'})
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=False)
