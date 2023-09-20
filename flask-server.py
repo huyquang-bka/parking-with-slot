@@ -2,20 +2,25 @@ import cv2
 from flask import Flask, request, jsonify, Response
 import zipfile
 import numpy as np
+import shutil
 
 app = Flask(__name__)
 port = 5518
 
 # create a black image 1920x1080
-original_tdn = np.zeros((1080, 1920, 3), np.uint8)
-processed_tdn = np.zeros((1080, 1920, 3), np.uint8)
+original_tdn_left = np.zeros((1080, 1920, 3), np.uint8)
+processed_tdn_left = np.zeros((1080, 1920, 3), np.uint8)
+original_tdn_right = np.zeros((1080, 1920, 3), np.uint8)
+processed_tdn_right = np.zeros((1080, 1920, 3), np.uint8)
 original_c9 = np.zeros((1080, 1920, 3), np.uint8)
 processed_c9 = np.zeros((1080, 1920, 3), np.uint8)
 original_d35 = np.zeros((1080, 1920, 3), np.uint8)
 processed_d35 = np.zeros((1080, 1920, 3), np.uint8)
 
-data_image = {"original_tdn": original_tdn,
-              "processed_tdn": processed_tdn,
+data_image = {"original_tdn_left": original_tdn_left,
+              "processed_tdn_left": processed_tdn_left,
+              "original_tdn_right": original_tdn_right,
+              "processed_tdn_right": processed_tdn_right,
               "original_c9": original_c9,
               "processed_c9": processed_c9,
               "original_d35": original_d35,
@@ -23,10 +28,10 @@ data_image = {"original_tdn": original_tdn,
               }
 
 
-def stream(key='original_tdn'):
+def stream(key='original_tdn_right'):
     while True:
         try:
-            fp = 'data/' + key + '.jpg'
+            fp = key + '.jpg'
             image = cv2.imread(fp)
             if image is not None:
                 data_image[key] = image.copy()
@@ -38,15 +43,27 @@ def stream(key='original_tdn'):
                b'Content-Type: image/jpeg\r\n\r\n' + buffer + b'\r\n')
 
 
-@app.route('/original-tdn')
-def original_tdn():
-    return Response(stream(key='original_tdn'),
+@app.route('/original-tdn-left')
+def original_tdn_left():
+    return Response(stream(key='original_tdn_left'),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route('/processed-tdn')
-def processed_tdn():
-    return Response(stream(key='processed_tdn'),
+@app.route('/processed-tdn-left')
+def processed_tdn_left():
+    return Response(stream(key='processed_tdn_left'),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/original-tdn-right')
+def original_tdn_left():
+    return Response(stream(key='original_tdn_right'),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/processed-tdn-right')
+def processed_tdn_left():
+    return Response(stream(key='processed_tdn_right'),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -81,11 +98,12 @@ def index():
 
 @app.route('/get-data', methods=['POST'])
 def get_data():
-    global original_tdn, processed_tdn
+    global original_tdn_left, processed_tdn_left
     f = request.files['file']
-    f.save('data.zip')
-    with zipfile.ZipFile('data.zip', 'r') as zip_ref:
-        zip_ref.extractall('data')
+    fn = f.filename
+    f.save(fn)
+    with zipfile.ZipFile(fn, "r") as zip_ref:
+        zip_ref.extractall()
     return jsonify({'status': 'success'})
 
 
