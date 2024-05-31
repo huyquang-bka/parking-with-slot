@@ -16,7 +16,7 @@ def process(location="tdn_left"):
             x, y, w, h = line.split(",")
             slots[idx] = [int(x), int(y), int(w), int(h)]
 
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5l', pretrained=True)
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', force_reload=True)
     model.conf = 0.25
     model.classes = [2, 5, 7]
 
@@ -77,7 +77,8 @@ def process(location="tdn_left"):
 if __name__ == "__main__":
     import threading
 
-    locations = ["tdn_left", "tdn_right"]
+    # locations = ["tdn_left", "tdn_right"]
+    locations = ["c9"]
 
     thread_list = []
     for location in locations:

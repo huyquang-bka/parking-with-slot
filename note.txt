@@ -1,0 +1,6 @@
+1. Cài thư viện trong requirements.txt
+2. Vẽ slot bằng file draw-slot.py nếu cần thiết
+3. Chạy flask-server.py để khởi động server stream ảnh
+4. Chạy main.py để chạy chương trình
+5. Xem hình ảnh tại http://localhost:5518/original-c9 hoặc http://localhost:5518/processed-c9
+3 và 4 chạy thành 2 terminal riêng biệt

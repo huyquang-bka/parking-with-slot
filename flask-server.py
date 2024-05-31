@@ -43,28 +43,28 @@ def stream(key='original_tdn_right'):
                b'Content-Type: image/jpeg\r\n\r\n' + buffer + b'\r\n')
 
 
-@app.route('/original-tdn-left')
-def original_tdn_left():
-    return Response(stream(key='original_tdn_left'),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+# @app.route('/original-tdn-left')
+# def original_tdn_left():
+#     return Response(stream(key='original_tdn_left'),
+#                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route('/processed-tdn-left')
-def processed_tdn_left():
-    return Response(stream(key='processed_tdn_left'),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+# @app.route('/processed-tdn-left')
+# def processed_tdn_left():
+#     return Response(stream(key='processed_tdn_left'),
+#                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route('/original-tdn-right')
-def original_tdn_left():
-    return Response(stream(key='original_tdn_right'),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+# @app.route('/original-tdn-right')
+# def original_tdn_left():
+#     return Response(stream(key='original_tdn_right'),
+#                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route('/processed-tdn-right')
-def processed_tdn_left():
-    return Response(stream(key='processed_tdn_right'),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+# @app.route('/processed-tdn-right')
+# def processed_tdn_left():
+#     return Response(stream(key='processed_tdn_right'),
+#                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route('/original-c9')
